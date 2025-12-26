@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test123</title>
+   
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Outfit"', 'sans-serif'],
+                    },
+                    colors: {
+                        background: '#09090b',
+                        surface: '#18181b',
+                        surface2: '#27272a',
+                        primary: '#6366f1', // Indigo 500
+                        primaryHover: '#4f46e5',
+                        accent: '#06b6d4', // Cyan
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px -5px rgba(99, 102, 241, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #09090b;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.08) 0%, transparent 25%);
+            min-height: 100vh;
+            color: #f4f4f5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .glass {
+            background: rgba(24, 24, 27, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-panel {
+            background: rgba(39, 39, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-left-color: #6366f1;
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast-enter { animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        /* PFP Borders (Refined) */
+        .pfp-wrapper { position: relative; border-radius: 50%; padding: 3px; display: inline-block; }
+        .pfp-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: #27272a; position: relative; z-index: 2; }
+        .pfp-border-bg { position: absolute; inset: 0; border-radius: 50%; z-index: 1; }
+        
+        /* Specific Border Styles (Simplified Logic for Cleaner Look) */
+        .border-default .pfp-border-bg { border: 2px solid #3f3f46; }
+        .border-gold .pfp-border-bg { box-shadow: 0 0 0 2px #ffd700; }
+        .border-galaxy .pfp-border-bg { background: linear-gradient(45deg, #f09, #30f, #0ff); animation: rotate 3s linear infinite; }
+        .border-fire .pfp-border-bg { box-shadow: 0 0 0 2px #ef4444, 0 0 10px #ef4444; }
+        .border-neon_blue .pfp-border-bg { box-shadow: 0 0 0 2px #3b82f6, 0 0 10px #3b82f6; }
+        .border-rainbow_spin .pfp-border-bg { background: conic-gradient(red, orange, yellow, green, blue, violet, red); animation: rotate 3s linear infinite; }
+        .border-glitch .pfp-border-bg { border: 2px solid white; animation: glitch 1s infinite; }
+        
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-1px, 1px); } 40% { transform: translate(-1px, -1px); } 60% { transform: translate(1px, 1px); } 80% { transform: translate(1px, -1px); } 100% { transform: translate(0); } }
+
+        /* Modal Transition */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.15s ease-in; }
+
+        /* Hide Scrollbar for specific elements */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="flex h-screen w-full">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside id="sidebar" class="w-72 h-full glass flex-col border-r border-white/5 hidden md:flex z-50 transition-all duration-300 transform">
+            <div class="p-6 pb-2">
+                <div class="flex items-center gap-3 mb-8">
+                    <img src="title.png" alt="Logo" class="h-10 w-auto object-contain">
+                    <span class="font-display font-bold text-xl tracking-wide hidden">VisualCraft</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-4 space-y-6">
+                <!-- Auth State: Logged Out -->
+                <div id="authBox" class="glass-panel p-5 rounded-xl space-y-3">
+                    <div class="text-sm text-gray-400 font-medium mb-1">Akses Akun</div>
+                    <input type="text" id="userIn" placeholder="Username" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors">
+                    <input type="password" id="passIn" placeholder="Password" class="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-colors">
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="login()" class="bg-primary hover:bg-primaryHover text-white py-2 rounded-lg text-sm font-medium transition-colors shadow-glow">Masuk</button>
+                        <button onclick="register()" class="bg-white/5 hover:bg-white/10 text-white py-2 rounded-lg text-sm font-medium transition-colors border border-white/5">Daftar</button>
+                    </div>
+                </div>
+
+                <!-- Auth State: Logged In -->
+                <div id="userBox" class="hidden space-y-6">
+                    <!-- Profile Card -->
+                    <div class="glass-panel p-4 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors group" onclick="openProfileEditModal()">
+                        <div id="sidebarPFP" class="pfp-wrapper w-12 h-12 flex-shrink-0">
+                            <div class="pfp-border-bg"></div>
+                            <img id="profileIcon" src="" class="pfp-img">
+                        </div>
+                        <div class="overflow-hidden">
+                            <h3 id="uName" class="font-bold text-white text-sm truncate group-hover:text-primary transition-colors">User</h3>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-xs text-emerald-400 font-medium">Online</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Menu -->
+                    <nav class="space-y-1">
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-2">Menu Utama</p>
+                        <button onclick="tryUploadModal()" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3">
+                            <i class="fa-solid fa-cloud-arrow-up text-accent w-5 text-center"></i> Upload Karya
+                        </button>
+                        <button onclick="openProfileEditModal()" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3">
+                            <i class="fa-solid fa-palette text-pink-500 w-5 text-center"></i> Edit Tampilan
+                        </button>
+                        <button onclick="openUserSearchModal()" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-3">
+                            <i class="fa-solid fa-users text-yellow-500 w-5 text-center"></i> Cari Creator
+                        </button>
+                    </nav>
+
+                    <!-- Admin Menu -->
+                    <div id="ownerTools" class="hidden space-y-1 pt-4 border-t border-white/5">
+                        <p class="text-xs font-bold text-red-400 uppercase tracking-wider px-2 mb-2">Admin Zone</p>
+                        <button onclick="showOwnerTab('users')" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-3">
+                            <i class="fa-solid fa-user-shield w-5 text-center"></i> Manage Users
+                        </button>
+                        <button onclick="openCategoryModal()" class="w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-3">
+                            <i class="fa-solid fa-tags w-5 text-center"></i> Manage Kategori
+                        </button>
+                        <!-- Admin Content Area -->
+                        <div id="ownerTabContent" class="mt-2 p-2 bg-black/20 rounded-lg text-xs max-h-40 overflow-y-auto"></div>
+                    </div>
+
+                    <button onclick="logout()" class="w-full border border-red-500/30 text-red-400 hover:bg-red-500/10 py-2 rounded-lg text-sm font-medium transition-colors mt-4">
+                        <i class="fa-solid fa-power-off mr-2"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-4 text-center border-t border-white/5">
+                <p class="text-xs text-gray-600">© 2025 VisualCraft Inc.</p>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col relative h-full overflow-hidden bg-background">
+            
+            <!-- Mobile Header -->
+            <header class="md:hidden h-16 glass flex items-center justify-between px-4 sticky top-0 z-40 border-b border-white/5">
+                <img src="title.png" alt="Logo" class="h-8 w-auto">
+                <button onclick="toggleMobileMenu()" class="text-gray-300 hover:text-white p-2">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </header>
+
+            <!-- Desktop Toolbar / Header -->
+            <div class="p-6 md:p-8 pb-0">
+                <div class="glass p-2 rounded-2xl flex flex-col md:flex-row gap-3 items-center justify-between shadow-lg">
+                    <!-- Search -->
+                    <div class="relative w-full md:max-w-md group">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors"></i>
+                        <input type="text" id="search" oninput="render()" placeholder="Temukan aset, map, atau addon..." 
+                            class="w-full bg-transparent border-none text-gray-200 placeholder-gray-500 pl-11 pr-4 py-3 focus:ring-0 text-sm">
+                    </div>
+                    
+                    <!-- Filters -->
+                    <div class="flex gap-2 w-full md:w-auto overflow-x-auto no-scrollbar pb-1 md:pb-0 px-2 md:px-0">
+                        <select id="categoryFilter" onchange="render()" class="bg-surface2 border-none text-gray-300 text-sm rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary cursor-pointer hover:bg-white/10 transition-colors">
+                            <option value="">Semua Kategori</option>
+                        </select>
+                        <select id="sortSelect" onchange="render()" class="bg-surface2 border-none text-gray-300 text-sm rounded-lg px-4 py-2.5 focus:ring-1 focus:ring-primary cursor-pointer hover:bg-white/10 transition-colors">
+                            <option value="newest">Terbaru</option>
+                            <option value="highest_rating">Rating Tertinggi</option>
+                            <option value="oldest">Terlama</option>
+                            <option value="title_asc">A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-8">
+                <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-10">
+                    <!-- Items injected here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="hidden flex flex-col items-center justify-center h-64 text-gray-500">
+                    <div class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-cube text-2xl opacity-50"></i>
+                    </div>
+                    <p class="text-sm font-medium">Tidak ada item ditemukan.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenu" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl transform translate-x-full transition-transform duration-300 md:hidden flex flex-col">
+        <div class="p-4 flex justify-end">
+            <button onclick="toggleMobileMenu()" class="p-2 text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
+        </div>
+        <div class="flex-1 p-6 overflow-y-auto" id="mobileMenuContent">
+            <!-- Content cloned from sidebar by JS -->
+        </div>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Base Modal Structure -->
+    <div id="modalOverlay" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <!-- Content will be injected here dynamically or toggled -->
+    </div>
+
+    <!-- ITEM DETAIL TEMPLATE (Hidden) -->
+    <div id="itemDetailContent" class="hidden max-w-4xl w-full bg-surface border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <!-- Header Image / Carousel -->
+        <div class="relative h-64 sm:h-80 bg-black group shrink-0">
+            <div id="detailCarousel" class="w-full h-full relative overflow-hidden">
+                <!-- Images injected here -->
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all z-20">✕</button>
+            <div class="absolute bottom-4 left-6 right-6 z-10 flex items-end justify-between">
+                <div>
+                    <span id="detailCat" class="bg-primary/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md mb-2 inline-block shadow-lg">Category</span>
+                    <h2 id="detailTitle" class="text-3xl font-display font-bold text-white leading-tight drop-shadow-md">Title</h2>
+                </div>
+            </div>
+            <!-- Nav buttons -->
+            <button class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-primary/80 text-white p-2 rounded-full backdrop-blur transition-all opacity-0 group-hover:opacity-100" onclick="moveSlide(-1)">❮</button>
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-primary/80 text-white p-2 rounded-full backdrop-blur transition-all opacity-0 group-hover:opacity-100" onclick="moveSlide(1)">❯</button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto bg-surface relative">
+            <div class="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Main Info -->
+                <div class="md:col-span-2 space-y-6">
+                    <!-- Author Bar -->
+                    <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" id="detailAuthorClick">
+                            <div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
+                                <img src="https://via.placeholder.com/50" class="w-full h-full object-cover" id="detailAuthorImg">
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-400">Diposting oleh</div>
+                                <div id="detailAuthor" class="font-bold text-white">Username</div>
+                            </div>
+                        </div>
+                        <div id="creatorCredit" class="text-right"></div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="flex gap-6 border-b border-white/5 text-sm font-medium">
+                        <button onclick="showDetailTab('desc')" id="tabBtn_desc" class="pb-3 text-primary border-b-2 border-primary transition-colors">Deskripsi</button>
+                        <button onclick="showDetailTab('log')" id="tabBtn_log" class="pb-3 text-gray-400 hover:text-white transition-colors">Changelog</button>
+                    </div>
+
+                    <!-- Content -->
+                    <div id="detailTab_desc" class="pt-4 space-y-4 animate-fadeIn">
+                        <div id="detailYoutubeContainer" class="rounded-xl overflow-hidden shadow-lg"></div>
+                        <div id="detailDesc" class="prose prose-invert prose-sm max-w-none text-gray-300"></div>
+                        
+                        <!-- Reviews Section -->
+                        <div id="ratingDisplay" class="mt-8 pt-6 border-t border-white/5"></div>
+                    </div>
+
+                    <div id="detailTab_log" class="hidden pt-4 space-y-3">
+                        <div id="detailChangelog" class="space-y-4 relative pl-4 border-l-2 border-white/10"></div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Action -->
+                <div class="md:col-span-1 space-y-4">
+                    <a id="detailLink" target="_blank" class="block w-full bg-primary hover:bg-primaryHover text-white text-center font-bold py-4 rounded-xl shadow-glow transition-all transform hover:-translate-y-1">
+                        <i class="fa-solid fa-download mr-2"></i> Download
+                    </a>
+                    
+                    <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                        <h4 class="text-sm font-bold text-white mb-2">Informasi File</h4>
+                        <div class="space-y-2 text-xs text-gray-400">
+                            <div class="flex justify-between"><span>Lisensi</span> <span class="text-white">Free</span></div>
+                            <div class="flex justify-between"><span>Versi Terkini</span> <span class="text-white" id="detailVersionDisplay">-</span></div>
+                            <div class="flex justify-between"><span>Update Terakhir</span> <span class="text-white" id="detailDateDisplay">-</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENERIC MODAL CONTAINER (For Forms, Lists, etc) -->
+    <div id="genericModalContent" class="hidden max-w-lg w-full bg-surface border border-white/10 rounded-2xl p-6 relative shadow-2xl transform transition-all">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">✕</button>
+        <h2 id="modalTitle" class="text-xl font-bold font-display mb-6">Title</h2>
+        <div id="modalBody"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, set, push, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBcYhpGSSEImXWov92ievzBgHrvODa0b1M",
+          authDomain: "visualmcraft.firebaseapp.com",
+          databaseURL: "https://visualmcraft-default-rtdb.asia-southeast1.firebasedatabase.app/",
+          projectId: "visualmcraft",
+          storageBucket: "visualmcraft.firebasestorage.app",
+          messagingSenderId: "699644931018",
+          appId: "1:699644931018:web:1560a9e10885ee8ee97d33"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+        const $ = id => document.getElementById(id);
+
+        // --- TOAST SYSTEM ---
+        window.showToast = (msg, type = 'success') => {
+            const container = $('toastContainer');
+            const el = document.createElement('div');
+            const colors = type === 'error' ? 'bg-red-500/90' : (type === 'warn' ? 'bg-orange-500/90' : 'bg-emerald-500/90');
+            const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+            
+            el.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg text-white shadow-lg backdrop-blur-md transform transition-all duration-300 toast-enter ${colors}`;
+            el.innerHTML = `<i class="fa-solid ${icon}"></i> <span class="text-sm font-medium">${msg}</span>`;
+            
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(100%)';
+                setTimeout(() => el.remove(), 300);
+            }, 3000);
+        };
+
+        // --- GLOBAL STATE ---
+        let allUsers = {}, allItems = [], allCategories = [];
+        let cropper = null, currentPfpBase64 = null, currentCoverImg = null, currentPVImgs = [];
+        let detailImgs = [], slideIdx = 0;
+        let selectedBorder = 'default';
+        const DEFAULT_CATEGORIES = ['Add-On', 'Skins', 'Shaders', 'Map', 'Texture Pack', 'Tambahan'];
+
+        // --- INITIALIZATION ---
+        function init() {
+            onValue(ref(db, 'users'), s => { 
+                allUsers = s.val() || {}; 
+                checkAuthUI(); 
+            });
+            onValue(ref(db, 'items'), s => { 
+                const o = s.val() || {}; 
+                allItems = Object.keys(o).map(k => ({
+                    id: k, ...o[k],
+                    changelog: o[k].changelog || [{version:'v1.0', text:'Rilis Awal', timestamp: Date.now()}],
+                    ratings: o[k].ratings || {},
+                    gallery: o[k].gallery || []
+                })).reverse();
+                render();
+            });
+            onValue(ref(db, 'categories'), s => {
+                const cats = s.val();
+                allCategories = (cats && Array.isArray(cats)) ? cats : DEFAULT_CATEGORIES;
+                if (!cats) set(ref(db, 'categories'), DEFAULT_CATEGORIES);
+                renderFilters();
+            });
+            onAuthStateChanged(auth, checkAuthUI);
+        }
+
+        // --- AUTH & SIDEBAR ---
+        function checkAuthUI() {
+            const u = auth.currentUser;
+            const authBox = $('authBox');
+            const userBox = $('userBox');
+            const ownerTools = $('ownerTools');
+            
+            // Sync Mobile Menu if open
+            if(window.innerWidth < 768) syncMobileMenu();
+
+            if (u) {
+                const d = allUsers[u.uid] || {};
+                authBox.classList.add('hidden');
+                userBox.classList.remove('hidden');
+                
+                $('uName').textContent = d.username || 'User';
+                $('profileIcon').src = d.pfp || 'https://via.placeholder.com/100';
+                applyBorder('sidebarPFP', d.border, d.customColor);
+
+                if (d.role === 'owner') {
+                    ownerTools.classList.remove('hidden');
+                } else {
+                    ownerTools.classList.add('hidden');
+                }
+            } else {
+                authBox.classList.remove('hidden');
+                userBox.classList.add('hidden');
+                ownerTools.classList.add('hidden');
+            }
+        }
+
+        window.login = async () => {
+            try {
+                const u = $('userIn').value.trim();
+                const usersArray = Object.values(allUsers);
+                const userDb = usersArray.find(user => user.username === u);
+                if (userDb && userDb.banned) throw new Error("Akun dibanned!");
+                
+                await signInWithEmailAndPassword(auth, u + '@vcm.com', $('passIn').value);
+                showToast(`Selamat datang, ${u}!`);
+            } catch(e) { showToast(e.message, 'error'); }
+        };
+        
+        window.register = async () => {
+            const u = $('userIn').value.trim(), p = $('passIn').value;
+            if(!u || p.length < 6) return showToast('Isi data dengan benar (Pass min 6)', 'warn');
+            if(Object.values(allUsers).some(user => user.username?.toLowerCase() === u.toLowerCase())) return showToast('Username sudah dipakai', 'error');
+            
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, u + '@vcm.com', p);
+                await set(ref(db, `users/${cred.user.uid}`), {
+                    username: u, role: 'user', banned: false, profilePic: 'https://via.placeholder.com/100', profileBorder: 'default'
+                });
+                showToast('Akun berhasil dibuat!');
+                $('userIn').value=''; $('passIn').value='';
+            } catch(e) { showToast(e.message, 'error'); }
+        };
+        
+        window.logout = () => { signOut(auth); showToast('Berhasil logout'); };
+
+        // --- MAIN RENDERER ---
+        window.render = () => {
+            const t = $('search').value.toLowerCase();
+            const cat = $('categoryFilter').value;
+            const sort = $('sortSelect').value;
+            const g = $('grid'); g.innerHTML = '';
+            
+            let filtered = allItems.filter(i => i.title.toLowerCase().includes(t) && (!cat || i.cat === cat));
+            
+            filtered.sort((a,b) => {
+                const rateA = getAvgRating(a.ratings), rateB = getAvgRating(b.ratings);
+                if (sort === 'highest_rating') return rateB - rateA;
+                if (sort === 'oldest') return (a.changelog[0]?.timestamp||0) - (b.changelog[0]?.timestamp||0);
+                if (sort === 'title_asc') return a.title.localeCompare(b.title);
+                return (b.changelog[b.changelog.length-1]?.timestamp||0) - (a.changelog[a.changelog.length-1]?.timestamp||0);
+            });
+
+            if(filtered.length === 0) $('empty').classList.remove('hidden');
+            else {
+                $('empty').classList.add('hidden');
+                filtered.forEach(i => {
+                    const avg = getAvgRating(i.ratings);
+                    const isOwner = auth.currentUser && allUsers[auth.currentUser.uid]?.role === 'owner';
+                    const isAuthor = auth.currentUser && auth.currentUser.uid === i.authorId;
+                    
+                    g.innerHTML += `
+                        <div class="group relative bg-surface border border-white/5 rounded-2xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col h-full">
+                            <div class="h-48 relative overflow-hidden cursor-pointer" onclick="openItemDetail('${i.id}')">
+                                <img src="${i.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60"></div>
+                                <span class="absolute top-3 left-3 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-full border border-white/10 uppercase tracking-wide">${i.cat}</span>
+                                <div class="absolute bottom-3 right-3 text-yellow-400 text-xs font-bold bg-black/40 px-2 py-1 rounded-md backdrop-blur">
+                                    <i class="fa-solid fa-star mr-1"></i> ${avg > 0 ? avg.toFixed(1) : '-'}
+                                </div>
+                            </div>
+                            <div class="p-4 flex flex-col flex-1">
+                                <h3 class="font-display font-bold text-lg text-white mb-1 line-clamp-1 group-hover:text-primary transition-colors cursor-pointer" onclick="openItemDetail('${i.id}')">${i.title}</h3>
+                                <div class="flex items-center gap-2 mb-4 cursor-pointer hover:opacity-75" onclick="openUserProfile('${i.authorId}')">
+                                    <img src="${allUsers[i.authorId]?.pfp || 'https://via.placeholder.com/30'}" class="w-5 h-5 rounded-full object-cover">
+                                    <span class="text-xs text-gray-400 font-medium">${i.author}</span>
+                                </div>
+                                
+                                <div class="mt-auto flex gap-2 pt-3 border-t border-white/5">
+                                    <button class="flex-1 bg-white/5 hover:bg-primary hover:text-white text-gray-300 py-2 rounded-lg text-xs font-bold transition-colors" onclick="openItemDetail('${i.id}')">LIHAT</button>
+                                    ${(isOwner || isAuthor) ? `
+                                        <button class="bg-surface2 hover:bg-accent hover:text-white text-gray-400 p-2 rounded-lg transition-colors w-9" onclick="openUploadModal('${i.id}')"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="bg-surface2 hover:bg-red-500 hover:text-white text-gray-400 p-2 rounded-lg transition-colors w-9" onclick="removeItem('${i.id}')"><i class="fa-solid fa-trash"></i></button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        function getAvgRating(r) {
+            const vals = Object.values(r||{});
+            return vals.length ? vals.reduce((a,b)=>a+(b.rating||0),0)/vals.length : 0;
+        }
+
+        // --- MODAL SYSTEM ---
+        window.openModal = (type, data = null) => {
+            const overlay = $('modalOverlay');
+            const generic = $('genericModalContent');
+            const detail = $('itemDetailContent');
+            
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            
+            // Reset contents
+            generic.classList.add('hidden');
+            detail.classList.add('hidden');
+
+            if (type === 'detail') {
+                detail.classList.remove('hidden');
+            } else {
+                generic.classList.remove('hidden');
+                renderGenericModalContent(type, data);
+            }
+        };
+
+        window.closeModal = () => {
+            const overlay = $('modalOverlay');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        };
+
+        // --- ITEM DETAIL ---
+        window.openItemDetail = (id) => {
+            const i = allItems.find(x => x.id === id); if(!i) return;
+            
+            // Populate Data
+            $('detailTitle').textContent = i.title;
+            $('detailCat').textContent = i.cat;
+            $('detailAuthor').textContent = i.author;
+            $('detailAuthorImg').src = allUsers[i.authorId]?.pfp || 'https://via.placeholder.com/50';
+            $('detailAuthorClick').onclick = () => { closeModal(); openUserProfile(i.authorId); };
+            $('detailDesc').innerHTML = marked.parse(i.desc || '');
+            $('detailLink').href = i.link;
+            
+            // Meta
+            const lastLog = i.changelog[i.changelog.length-1];
+            $('detailVersionDisplay').textContent = lastLog?.version || 'v1.0';
+            $('detailDateDisplay').textContent = new Date(lastLog?.timestamp).toLocaleDateString();
+            
+            // Credit
+            $('creatorCredit').innerHTML = i.originalCreator ? `<div class="text-[10px] text-accent font-bold uppercase tracking-wider">Original Creator</div><div class="text-sm text-gray-300">${i.originalCreator}</div>` : '';
+
+            // Carousel
+            detailImgs = (i.gallery && i.gallery.length) ? i.gallery : [i.img];
+            slideIdx = 0;
+            renderSlide();
+
+            // Tabs
+            showDetailTab('desc');
+            
+            // Changelog
+            const logHTML = i.changelog.slice().reverse().map(l => `
+                <div class="relative">
+                    <div class="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-primary ring-4 ring-surface"></div>
+                    <div class="font-bold text-white text-sm">${l.version} <span class="text-gray-500 font-normal text-xs ml-2">${new Date(l.timestamp).toLocaleDateString()}</span></div>
+                    <div class="text-gray-400 text-sm mt-1">${l.text}</div>
+                </div>
+            `).join('');
+            $('detailChangelog').innerHTML = logHTML;
+
+            // YouTube
+            const ytid = i.youtube?.match(/(?:v=|youtu\.be\/)([^&]+)/)?.[1];
+            $('detailYoutubeContainer').innerHTML = ytid ? `<iframe class="w-full aspect-video" src="https://www.youtube.com/embed/${ytid}" frameborder="0" allowfullscreen></iframe>` : '';
+
+            // Ratings Render
+            renderRatingUI(i);
+
+            openModal('detail');
+        };
+
+        window.renderSlide = () => {
+            const c = $('detailCarousel');
+            // Keep nav buttons, remove imgs
+            Array.from(c.children).forEach(el => { if(el.tagName === 'IMG') el.remove(); });
+            const img = document.createElement('img');
+            img.src = detailImgs[slideIdx];
+            img.className = 'w-full h-full object-cover absolute inset-0 animate-fadeIn';
+            c.prepend(img);
+        };
+        window.moveSlide = (n) => {
+            slideIdx = (slideIdx + n + detailImgs.length) % detailImgs.length;
+            renderSlide();
+        };
+
+        window.showDetailTab = (t) => {
+            $('detailTab_desc').classList.toggle('hidden', t!=='desc');
+            $('detailTab_log').classList.toggle('hidden', t!=='log');
+            
+            // Button Styles
+            const activeClass = ['text-primary', 'border-b-2', 'border-primary'];
+            const inactiveClass = ['text-gray-400', 'hover:text-white'];
+            
+            $('tabBtn_desc').classList.remove(...(t==='desc'?inactiveClass:activeClass));
+            $('tabBtn_desc').classList.add(...(t==='desc'?activeClass:inactiveClass));
+            
+            $('tabBtn_log').classList.remove(...(t==='log'?inactiveClass:activeClass));
+            $('tabBtn_log').classList.add(...(t==='log'?activeClass:inactiveClass));
+        };
+
+        // --- RATINGS ---
+        function renderRatingUI(i) {
+            const ratings = Object.values(i.ratings);
+            const avg = getAvgRating(i.ratings);
+            const userRating = auth.currentUser ? i.ratings[auth.currentUser.uid] : null;
+
+            let html = `
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <div class="text-2xl font-bold text-white flex items-center gap-2">
+                            ${avg.toFixed(1)} <div class="flex text-sm text-yellow-500">${getStars(avg)}</div>
+                        </div>
+                        <div class="text-xs text-gray-500">${ratings.length} Ulasan</div>
+                    </div>
+                    ${auth.currentUser ? `<button onclick="openRateForm('${i.id}')" class="bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-2 rounded-lg text-sm transition-colors">Beri Ulasan</button>` : ''}
+                </div>
+                <div class="space-y-4">
+            `;
+            
+            if(!ratings.length) html += `<div class="text-gray-500 text-sm italic">Belum ada ulasan. Jadilah yang pertama!</div>`;
+            else {
+                ratings.sort((a,b)=>b.timestamp-a.timestamp).slice(0,3).forEach(r => {
+                    html += `
+                        <div class="bg-black/20 p-3 rounded-lg">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="font-bold text-sm text-white">${r.username}</span>
+                                <span class="text-yellow-500 text-xs">${getStars(r.rating)}</span>
+                            </div>
+                            <p class="text-gray-400 text-sm">${r.review || ''}</p>
+                        </div>
+                    `;
+                });
+            }
+            html += `</div>`;
+            $('ratingDisplay').innerHTML = html;
+        }
+
+        function getStars(n) {
+            let s = '';
+            for(let i=1;i<=5;i++) s += `<i class="fa-${i<=Math.round(n)?'solid':'regular'} fa-star"></i>`;
+            return s;
+        }
+
+        window.openRateForm = (itemId) => {
+            if(!auth.currentUser) return showToast('Login dulu', 'warn');
+            const i = allItems.find(x=>x.id===itemId);
+            const prev = i.ratings[auth.currentUser.uid] || {};
+            
+            const formHtml = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Rating</label>
+                        <select id="rateVal" class="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-primary">
+                            <option value="5">★★★★★ Perfect</option>
+                            <option value="4">★★★★ Good</option>
+                            <option value="3">★★★ Okay</option>
+                            <option value="2">★★ Bad</option>
+                            <option value="1">★ Terrible</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Review</label>
+                        <textarea id="rateMsg" rows="3" class="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-white outline-none focus:border-primary" placeholder="Opsional...">${prev.review||''}</textarea>
+                    </div>
+                    <button onclick="submitRating('${itemId}')" class="w-full bg-primary text-white py-2 rounded-lg font-bold">Kirim</button>
+                </div>
+            `;
+            
+            // Inject into generic modal directly for nested feel, or just replace content
+            $('modalTitle').textContent = `Rating: ${i.title}`;
+            $('modalBody').innerHTML = formHtml;
+            $('itemDetailContent').classList.add('hidden'); // Hide detail temporarily
+            $('genericModalContent').classList.remove('hidden');
+            if(prev.rating) $('rateVal').value = prev.rating;
+        };
+        
+        window.submitRating = async (id) => {
+            const u = auth.currentUser;
+            await set(ref(db, `items/${id}/ratings/${u.uid}`), {
+                userId: u.uid, username: allUsers[u.uid].username,
+                rating: parseInt($('rateVal').value), review: $('rateMsg').value, timestamp: Date.now()
+            });
+            showToast('Ulasan terkirim!');
+            closeModal(); // Close rate modal
+        };
+
+        // --- UPLOAD / EDIT FORM ---
+        window.openUploadModal = (editId = null) => {
+            if(!auth.currentUser) return showToast('Login dulu', 'warn');
+            
+            const isEdit = !!editId;
+            const i = isEdit ? allItems.find(x=>x.id===editId) : {};
+            
+            if(isEdit) { currentCoverImg=i.img; currentPVImgs=i.gallery||[]; } 
+            else { currentCoverImg=null; currentPVImgs=[]; }
+
+            const formHtml = `
+                <form onsubmit="event.preventDefault(); submitItem('${editId || ''}')" class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scroll">
+                    <input type="text" id="upTitle" value="${i.title||''}" placeholder="Judul Karya" class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-primary outline-none" required>
+                    <textarea id="upDesc" rows="4" placeholder="Deskripsi (Markdown Supported)" class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white focus:border-primary outline-none" required>${i.desc||''}</textarea>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <select id="upCat" class="bg-black/20 border border-white/10 rounded-lg p-3 text-white outline-none">
+                            ${allCategories.map(c => `<option value="${c}" ${c===i.cat?'selected':''}>${c}</option>`).join('')}
+                        </select>
+                        <div class="relative">
+                            <input type="file" id="upCover" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleCover(this)">
+                            <div class="bg-black/20 border border-white/10 border-dashed rounded-lg p-3 text-center text-gray-400 text-sm hover:border-primary transition-colors flex items-center justify-center h-full">
+                                <i class="fa-solid fa-image mr-2"></i> ${isEdit ? 'Ganti Cover' : 'Pilih Cover'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Gallery (Max 15)</label>
+                        <input type="file" multiple accept="image/*" onchange="handlePV(this)" class="block w-full text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-white hover:file:bg-white/20">
+                        <div id="pvCount" class="text-[10px] text-primary mt-1">${currentPVImgs.length} gambar tersimpan</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="url" id="upLink" value="${i.link||''}" placeholder="Link Download" class="bg-black/20 border border-white/10 rounded-lg p-3 text-white text-sm outline-none" required>
+                        <input type="url" id="upYoutube" value="${i.youtube||''}" placeholder="Link YouTube Showcase" class="bg-black/20 border border-white/10 rounded-lg p-3 text-white text-sm outline-none">
+                    </div>
+                    
+                    <input type="text" id="upOriginalCreator" value="${i.originalCreator||''}" placeholder="Credit Creator Asli (Opsional)" class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white text-sm outline-none">
+
+                    <div class="bg-white/5 p-3 rounded-lg border border-white/5">
+                        <label class="block text-xs text-primary font-bold mb-2 uppercase">Update Log</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="upVersion" placeholder="v1.0" class="w-1/3 bg-black/30 border-none rounded-md px-2 py-1 text-sm text-white">
+                            <input type="text" id="upChangelog" placeholder="Apa yang baru?" class="flex-1 bg-black/30 border-none rounded-md px-2 py-1 text-sm text-white">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-primary hover:bg-primaryHover text-white py-3 rounded-xl font-bold shadow-glow transition-all">${isEdit ? 'Simpan Perubahan' : 'Posting Karya'}</button>
+                </form>
+            `;
+            
+            $('modalTitle').textContent = isEdit ? 'Edit Karya' : 'Upload Baru';
+            $('modalBody').innerHTML = formHtml;
+            openModal('generic');
+        };
+
+        window.handleCover = (input) => {
+            const f = input.files[0];
+            if(f) { const r = new FileReader(); r.onload=e=>currentCoverImg=e.target.result; r.readAsDataURL(f); }
+        };
+        window.handlePV = (input) => {
+            if(input.files.length > 15) return showToast('Max 15 gambar', 'error');
+            currentPVImgs = [];
+            Array.from(input.files).forEach(f => {
+                const r = new FileReader(); r.onload=e=>{currentPVImgs.push(e.target.result); $('pvCount').textContent=`${currentPVImgs.length} gambar dipilih`;}; r.readAsDataURL(f);
+            });
+        };
+
+        window.submitItem = async (editId) => {
+            if(!currentCoverImg) return showToast('Cover wajib ada!', 'error');
+            
+            const ver = $('upVersion').value || 'v1.0';
+            const logText = $('upChangelog').value;
+            
+            const data = {
+                title: $('upTitle').value, desc: $('upDesc').value, cat: $('upCat').value,
+                link: $('upLink').value, youtube: $('upYoutube').value, originalCreator: $('upOriginalCreator').value
+            };
+
+            if(editId) {
+                const old = allItems.find(x=>x.id===editId);
+                const newLog = old.changelog || [];
+                if(logText) newLog.push({version: ver, text: logText, timestamp: Date.now()});
+                
+                await update(ref(db, `items/${editId}`), {
+                    ...data, img: currentCoverImg, gallery: currentPVImgs.length ? currentPVImgs : (old.gallery||[]), changelog: newLog,
+                    authorId: old.authorId, author: old.author
+                });
+            } else {
+                await push(ref(db, 'items'), {
+                    ...data, img: currentCoverImg, gallery: currentPVImgs,
+                    changelog: [{version: ver, text: logText||'Rilis Awal', timestamp: Date.now()}],
+                    authorId: auth.currentUser.uid, author: allUsers[auth.currentUser.uid].username,
+                    ratings: {}
+                });
+            }
+            showToast('Berhasil disimpan!'); closeModal();
+        };
+        
+        window.removeItem = async (id) => { if(confirm('Hapus item ini?')) await set(ref(db, `items/${id}`), null); };
+
+        // --- PROFILE EDIT ---
+        const BORDERS = ['default', 'gold', 'galaxy', 'fire', 'neon_blue', 'rainbow_spin', 'glitch']; // Simplified list
+
+        window.openProfileEditModal = () => {
+            if(!auth.currentUser) return;
+            const u = allUsers[auth.currentUser.uid];
+            currentPfpBase64 = null;
+            selectedBorder = u.border || 'default';
+
+            const formHtml = `
+                <div class="flex gap-4 h-[60vh]">
+                    <!-- Sidebar Tabs (Vertical) -->
+                    <div class="w-1/4 border-r border-white/10 space-y-2 pr-2">
+                        <button onclick="switchProfileTab('bio')" id="ptab_bio" class="w-full text-left p-2 rounded text-sm bg-white/10 text-white">Bio & Foto</button>
+                        <button onclick="switchProfileTab('border')" id="ptab_border" class="w-full text-left p-2 rounded text-sm text-gray-400 hover:bg-white/5">Border</button>
+                        <button onclick="switchProfileTab('social')" id="ptab_social" class="w-full text-left p-2 rounded text-sm text-gray-400 hover:bg-white/5">Sosial Media</button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 overflow-y-auto pl-2 relative">
+                        
+                        <!-- TAB: BIO -->
+                        <div id="pcontent_bio" class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-white/10 relative group cursor-pointer">
+                                    <img id="editPfpPreview" src="${u.pfp}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/50 hidden group-hover:flex items-center justify-center text-white text-xs" onclick="$('pfpInput').click()">Ubah</div>
+                                </div>
+                                <input type="file" id="pfpInput" class="hidden" accept="image/*" onchange="initCrop(this)">
+                                <div class="text-xs text-gray-400">Klik foto untuk mengganti.<br>Max 2MB.</div>
+                            </div>
+                            
+                            <!-- Cropper Area -->
+                            <div id="cropArea" class="hidden bg-black/50 p-2 rounded-lg border border-white/10">
+                                <div class="h-40 w-full mb-2"><img id="imgToCrop" class="max-h-full mx-auto"></div>
+                                <div class="flex gap-2">
+                                    <button onclick="doCrop()" class="flex-1 bg-primary py-1 rounded text-xs text-white">Crop</button>
+                                    <button onclick="$('cropArea').classList.add('hidden')" class="flex-1 bg-white/10 py-1 rounded text-xs text-white">Batal</button>
+                                </div>
+                            </div>
+
+                            <textarea id="bioInput" rows="4" class="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-white text-sm outline-none" placeholder="Bio Anda...">${u.bio||''}</textarea>
+                            <button onclick="saveProfileBio()" class="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold">Simpan Bio</button>
+                        </div>
+
+                        <!-- TAB: BORDER -->
+                        <div id="pcontent_border" class="hidden grid grid-cols-3 gap-3">
+                            ${BORDERS.map(b => `
+                                <div onclick="selectBorder('${b}')" class="cursor-pointer bg-black/20 p-3 rounded-lg border border-white/5 hover:bg-white/5 flex flex-col items-center gap-2 transition-colors ${selectedBorder===b?'ring-2 ring-primary':''}">
+                                    <div class="pfp-wrapper border-${b} w-10 h-10">
+                                        <div class="pfp-border-bg"></div>
+                                        <img src="${u.pfp}" class="pfp-img">
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 capitalize">${b.replace('_',' ')}</span>
+                                </div>
+                            `).join('')}
+                            <div class="col-span-3 mt-4">
+                                <label class="text-xs text-gray-400">Custom Color (Khusus 'Custom' Border)</label>
+                                <input type="color" id="customColorInput" value="${u.customColor||'#ffffff'}" class="w-full h-8 mt-1 rounded cursor-pointer">
+                            </div>
+                            <button onclick="saveProfileBorder()" class="col-span-3 bg-primary text-white py-2 rounded-lg text-sm font-bold mt-2">Simpan Border</button>
+                        </div>
+                        
+                        <!-- TAB: SOCIAL -->
+                        <div id="pcontent_social" class="hidden space-y-3">
+                            <input type="text" id="soc_dc" value="${u.socials?.discord||''}" placeholder="Discord Link" class="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-white text-sm">
+                            <input type="text" id="soc_wa" value="${u.socials?.whatsapp||''}" placeholder="WhatsApp Link" class="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-white text-sm">
+                            <input type="text" id="soc_yt" value="${u.socials?.youtube||''}" placeholder="YouTube Channel" class="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-white text-sm">
+                            <button onclick="saveProfileSocial()" class="w-full bg-primary text-white py-2 rounded-lg text-sm font-bold">Simpan Link</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('modalTitle').textContent = 'Edit Profile';
+            $('modalBody').innerHTML = formHtml;
+            openModal('generic');
+        };
+
+        window.switchProfileTab = (t) => {
+            ['bio','border','social'].forEach(x => {
+                $(`pcontent_${x}`).classList.toggle('hidden', x!==t);
+                const btn = $(`ptab_${x}`);
+                if(x===t) { btn.classList.remove('text-gray-400','hover:bg-white/5'); btn.classList.add('bg-white/10','text-white'); }
+                else { btn.classList.add('text-gray-400','hover:bg-white/5'); btn.classList.remove('bg-white/10','text-white'); }
+            });
+        };
+
+        window.initCrop = (i) => {
+            const f=i.files[0]; if(f){ const r=new FileReader(); r.onload=e=> { $('cropArea').classList.remove('hidden'); $('imgToCrop').src=e.target.result; if(cropper)cropper.destroy(); cropper=new Cropper($('imgToCrop'),{aspectRatio:1, viewMode:1}); }; r.readAsDataURL(f); }
+        };
+        window.doCrop = () => { if(cropper){ currentPfpBase64 = cropper.getCroppedCanvas({width:200,height:200}).toDataURL('image/jpeg',0.8); $('editPfpPreview').src=currentPfpBase64; $('cropArea').classList.add('hidden'); } };
+
+        window.selectBorder = (b) => { selectedBorder = b; openProfileEditModal(); }; // Re-render to show selection ring
+        
+        window.saveProfileBio = async () => {
+            const u = { bio: $('bioInput').value }; if(currentPfpBase64) u.pfp = currentPfpBase64;
+            await update(ref(db, `users/${auth.currentUser.uid}`), u); showToast('Bio disimpan');
+        };
+        window.saveProfileBorder = async () => {
+            await update(ref(db, `users/${auth.currentUser.uid}`), { border: selectedBorder, customColor: $('customColorInput').value }); showToast('Border disimpan');
+        };
+        window.saveProfileSocial = async () => {
+            await update(ref(db, `users/${auth.currentUser.uid}`), { socials: { discord:$('soc_dc').value, whatsapp:$('soc_wa').value, youtube:$('soc_yt').value } }); showToast('Socials disimpan');
+        };
+
+        // --- PUBLIC PROFILE VIEW ---
+        window.openUserProfile = (uid) => {
+            const u = allUsers[uid]; if(!u) return;
+            const items = allItems.filter(i => i.authorId === uid);
+            
+            const html = `
+                <div class="text-center mb-6">
+                    <div class="w-24 h-24 mx-auto mb-3 pfp-wrapper border-${u.border||'default'}">
+                        <div class="pfp-border-bg" style="${u.border==='custom'?`border:3px solid ${u.customColor}`:''}"></div>
+                        <img src="${u.pfp}" class="pfp-img">
+                    </div>
+                    <h3 class="text-xl font-bold text-white">${u.username}</h3>
+                    <div class="text-[10px] font-bold tracking-widest text-accent uppercase mb-3">${u.role||'USER'}</div>
+                    
+                    <div class="flex justify-center gap-3">
+                        ${u.socials?.discord ? `<a href="${u.socials.discord}" class="bg-[#5865F2] p-2 rounded-lg text-white hover:opacity-80"><i class="fa-brands fa-discord"></i></a>` : ''}
+                        ${u.socials?.whatsapp ? `<a href="${u.socials.whatsapp}" class="bg-[#25D366] p-2 rounded-lg text-white hover:opacity-80"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+                        ${u.socials?.youtube ? `<a href="${u.socials.youtube}" class="bg-[#FF0000] p-2 rounded-lg text-white hover:opacity-80"><i class="fa-brands fa-youtube"></i></a>` : ''}
+                    </div>
+                </div>
+
+                <div class="bg-black/20 p-4 rounded-xl border border-white/5 mb-6 text-sm text-gray-300">
+                    ${marked.parse(u.bio || '_Tidak ada bio._')}
+                </div>
+
+                <h4 class="font-bold text-white mb-3 border-b border-white/5 pb-2">Portfolio (${items.length})</h4>
+                <div class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto">
+                    ${items.map(i => `
+                        <div onclick="openItemDetail('${i.id}')" class="aspect-square rounded-lg overflow-hidden cursor-pointer relative group">
+                            <img src="${i.img}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white text-center p-1 transition-opacity">${i.title}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            $('modalTitle').textContent = 'Profile';
+            $('modalBody').innerHTML = html;
+            openModal('generic');
+        };
+
+        // --- ADMIN HELPERS ---
+        window.renderFilters = () => {
+            const sel = $('categoryFilter'); sel.innerHTML = '<option value="">Semua Kategori</option>';
+            allCategories.forEach(c => { const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
+        };
+        window.openCategoryModal = () => {
+            const html = `
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="newCat" placeholder="Kategori Baru" class="flex-1 bg-black/20 border border-white/10 rounded px-2 py-1 text-white text-sm">
+                    <button onclick="addCat()" class="bg-primary text-white px-3 py-1 rounded text-sm font-bold">Add</button>
+                </div>
+                <div class="space-y-2 max-h-60 overflow-y-auto">
+                    ${allCategories.map(c => `
+                        <div class="flex justify-between items-center bg-white/5 p-2 rounded text-sm text-gray-300">
+                            ${c} <button onclick="delCat('${c}')" class="text-red-400 hover:text-red-300">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            $('modalTitle').textContent = 'Manage Categories'; $('modalBody').innerHTML = html; openModal('generic');
+        };
+        window.addCat = async () => { const n=$('newCat').value.trim(); if(n && !allCategories.includes(n)) { await set(ref(db,'categories'), [...allCategories, n]); openCategoryModal(); } };
+        window.delCat = async (c) => { if(confirm('Hapus?')) { await set(ref(db,'categories'), allCategories.filter(x=>x!==c)); openCategoryModal(); } };
+        
+        window.showOwnerTab = (tab) => {
+            const d = $('ownerTabContent');
+            if(tab === 'users') {
+                d.innerHTML = Object.entries(allUsers).map(([uid, u]) => `
+                    <div class="flex justify-between p-1 border-b border-white/5">
+                        <span>${u.username} <span class="${u.role==='owner'?'text-red-400':'text-emerald-400'} text-[10px] uppercase">${u.role}</span></span>
+                        ${uid !== auth.currentUser.uid ? `<button onclick="toggleRole('${uid}','${u.role}')" class="text-[10px] bg-white/10 px-1 rounded hover:bg-white/20">Switch</button>` : ''}
+                    </div>
+                `).join('');
+            }
+        };
+        window.toggleRole = async (uid, r) => { await update(ref(db, `users/${uid}`), { role: r==='owner'?'user':'owner' }); showOwnerTab('users'); };
+
+        // --- UTILS ---
+        window.toggleMobileMenu = () => {
+            const m = $('mobileMenu');
+            const isOpen = !m.classList.contains('translate-x-full');
+            m.classList.toggle('translate-x-full');
+            if(!isOpen) syncMobileMenu();
+        };
+
+        function syncMobileMenu() {
+            // Clone sidebar content to mobile menu for simplicity
+            const content = $('sidebar').innerHTML;
+            $('mobileMenuContent').innerHTML = content;
+            // Re-attach event listeners? No, onclick attributes handle it. 
+            // However, we need to handle specific styling adjustments if needed.
+            // Hide the logo in mobile menu content as it's in header
+            $('mobileMenuContent').querySelector('img').parentElement.classList.add('hidden');
+        }
+
+        function applyBorder(eid, border, col) {
+            const el = $(eid); if(!el) return;
+            el.className = `pfp-wrapper flex-shrink-0 w-full h-full border-${border||'default'}`;
+            const bg = el.querySelector('.pfp-border-bg');
+            if(bg) bg.style = (border==='custom' && col) ? `border:3px solid ${col}; box-shadow:0 0 10px ${col}` : '';
+        }
+
+        // --- RUN ---
+        init();
+    </script>
+</body>
+</html>
